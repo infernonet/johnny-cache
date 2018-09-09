@@ -1,7 +1,7 @@
 from warnings import warn
 
 from django.conf import settings
-from django.core.cache import get_cache, cache
+from django.core.cache import caches, cache
 
 DISABLE_QUERYSET_CACHE = getattr(settings, 'DISABLE_QUERYSET_CACHE', False)
 
@@ -38,9 +38,9 @@ def _get_backend():
         warn("Multiple caches configured for johnny-cache; using %s." %
              enabled[0])
     if enabled:
-        return get_cache(enabled[0])
+        return caches[enabled[0]]
     if CACHE_BACKEND:
-        backend = get_cache(CACHE_BACKEND)
+        backend = caches[CACHE_BACKEND]
         if backend not in CACHES:
             from django.core import signals
             # Some caches -- python-memcached in particular -- need to do a
