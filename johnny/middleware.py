@@ -3,10 +3,12 @@
 
 """Middleware classes for johnny cache."""
 
+from django.utils.deprecation import MiddlewareMixin
+
 from johnny import cache, settings
 
 
-class QueryCacheMiddleware(object):
+class QueryCacheMiddleware(MiddlewareMixin):
     """
     This middleware class monkey-patches django's ORM to maintain
     generational info on each table (model) and to automatically cache all
@@ -15,7 +17,8 @@ class QueryCacheMiddleware(object):
     """
     __state = {}  # Alex Martelli's borg pattern
 
-    def __init__(self):
+    def __init__(self, get_response):
+        self.get_response = get_response
         self.__dict__ = self.__state
         self.disabled = settings.DISABLE_QUERYSET_CACHE
         self.installed = getattr(self, 'installed', False)
@@ -33,7 +36,7 @@ class QueryCacheMiddleware(object):
         self.installed = False
 
 
-class LocalStoreClearMiddleware(object):
+class LocalStoreClearMiddleware(MiddlewareMixin):
     """
     This middleware clears the localstore cache in `johnny.cache.local`
     at the end of every request.
